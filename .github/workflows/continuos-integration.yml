@@ -19,5 +19,9 @@ jobs:
       with:
        java-version: '11'
        distribution: 'adopt'
+     
+    - name: Build Eureka Server Container Image
+      working-directory: ./eureka-server
+      run: mvn clean package -DskipTests
        
        
