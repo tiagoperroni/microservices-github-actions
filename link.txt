@@ -1,0 +1,8 @@
+http://localhost:8765/cambio-service/cambio-service/8/USD/CLP
+
+http://localhost:8765/cambio-service/5/USD/BRL
+
+http://localhost:8765/book-service/1/BRL
+
+TESTE
+http://localhost:8765/book-service/foo-bar

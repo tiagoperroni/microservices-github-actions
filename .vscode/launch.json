@@ -1,0 +1,44 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-EurekaServerApplication<eureka-server>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "mainClass": "com.tiagoperroni.eurekaserver.EurekaServerApplication",
+      "projectName": "eureka-server",
+      "args": ""
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-CabioServiceApplication<cabio-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "mainClass": "com.tiagoperroni.cabioservice.CabioServiceApplication",
+      "projectName": "cabio-service",
+      "args": ""
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-BookServiceApplication<book-service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "mainClass": "com.tiagoperroni.bookservice.BookServiceApplication",
+      "projectName": "book-service",
+      "args": ""
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-ApiGatewayApplication<api-gateway>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "mainClass": "com.tiagoperroni.apigateway.ApiGatewayApplication",
+      "projectName": "api-gateway",
+      "args": ""
+    }
+  ]
+}

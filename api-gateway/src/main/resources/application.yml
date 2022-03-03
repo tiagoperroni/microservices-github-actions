@@ -1,0 +1,44 @@
+server:
+  port: 8765
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud: ##habilitando a descoberta dos paths
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+            
+      routes: ## setando as rotas  
+      - id: cambio-service
+        uri: lb://cambio-service
+        predicates: 
+        - Path=/cambio-service/**
+      - id: book-service
+        uri: lb://book-service
+        predicates: 
+        - Path=/book-service/**
+      - id: openapi
+        uri: lb://api-gateway
+        predicates: 
+        - Path=/v3/api-docs/**
+        filters:
+        - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+
+    config: ## config client 
+      enabled: false
+
+  sleuth: ## para dizer que queremos rastrear 100% - em prod correto usar 0.05
+    sampler:
+      propability: 1.0
+  
+  # zipkin: ## isso ja é padra e nem precisaria por só se usasse porta diferente
+  #   base-url: http://localhost:9411/
+
+## url eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA-SERVER:localhost}:8761/eureka

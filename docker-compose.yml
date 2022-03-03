@@ -1,0 +1,145 @@
+version: '3.4'
+
+services:
+  eureka-server:
+    container_name: eureka-container
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+      args:
+        version: 1
+    image: tiagoperroni/eureka-api:0.1
+    ports:
+      - 8761:8761
+    networks:
+      - eureka-network
+
+  gateway-server:
+    container_name: gateway-container
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+      args:
+        version: 1
+    image: tiagoperroni/api-gateway:0.1
+    depends_on:
+      - eureka-server
+      - rabbit-mq
+    environment:
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/ # Alterando valor da variavel dentro do container
+      EUREKA-SERVER: eureka-server
+      # EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka-server:8761/eureka
+      RABBIT_URI: amqp://guest:guest@rabbit-mq:5672
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+    ports:
+      - 8765:8765
+    networks:
+      - eureka-network
+
+  cambio-service:
+    container_name: cambio_service-container
+    build:
+      context: ./cabio-service
+      dockerfile: Dockerfile
+      args:
+        version: 1
+    image: tiagoperroni/api-cambio:0.1
+    depends_on:
+      - eureka-server
+      - cambio-db
+      - rabbit-mq
+    environment:
+      - TZ=America/Sao_Paulo
+      - SPRING.ZIPKIN.BASEURL=http://zipkin:9411/
+      - EUREKA-SERVER=eureka-server
+      - DATABASE-HOST=cambio-db
+      - FLYWAY-DATABASE-HOST=cambio-db
+      - RABBIT_URI=amqp://guest:guest@rabbit-mq:5672
+      - SPRING_RABBITMQ_HOST=rabbit-mq
+      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+    ports:
+      - 8001:8001
+    networks:
+      - eureka-network
+
+  book-service:
+    container_name: book_service-container
+    build:
+      context: ./book-service
+      dockerfile: Dockerfile
+      args:
+        version: 1
+    image: tiagoperroni/api-book:0.1
+    depends_on:
+      - eureka-server
+      - cambio-db
+      - rabbit-mq
+    environment:
+      - TZ=America/Sao_Paulo
+      - SPRING.ZIPKIN.BASEURL=http://zipkin:9411/
+      - EUREKA-SERVER=eureka-server
+      - DATABASE_HOST=book-db
+      - DATABASE_PORT=3307
+      - RABBIT_URI=amqp://guest:guest@rabbit-mq:5672
+      - SPRING_RABBITMQ_HOST=rabbit-mq
+      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+    ports:
+      - 8100:8100
+    networks:
+      - eureka-network  
+
+  cambio-db:
+    container_name: cambiodb-container
+    hostname: mysql    
+    image: mysql:latest
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: 12345
+      #MYSQL_USER: tiagoperroni
+      #MYSQL_PASSWORD: admin123
+      MYSQL_DATABASE: cambio_service
+    ports:
+      - 3306:3306
+    networks:
+      - eureka-network
+
+  book-db:
+    container_name: bookdb-container    
+    image: mysql:latest
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: 12345
+      #MYSQL_USER: tiagoperroni
+      #MYSQL_PASSWORD: admin123
+      MYSQL_DATABASE: book_service
+      MYSQL_TCP_PORT: 3307
+    ports:
+      - 3307:3307
+    networks:
+      - eureka-network
+
+  zipkin:
+    container_name: zipikin-container    
+    image: openzipkin/zipkin:latest
+    ports:
+      - 9411:9411
+    depends_on:
+      - rabbit-mq
+    environment:
+      - RABBIT_URI=amqp://guest:guest@rabbit-mq:5672
+    networks:
+      - eureka-network
+
+  rabbit-mq:
+    container_name: rabbit-container    
+    image: rabbitmq:3.8.14-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - eureka-network
+
+networks:
+  eureka-network:
+    driver: bridge
